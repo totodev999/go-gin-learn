@@ -1,9 +1,12 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
+	"free-market/dto"
 	"free-market/infra"
 	"free-market/models"
+	"free-market/services"
 	"log"
 	"net/http"
 	"net/http/httptest"
@@ -114,4 +117,56 @@ func TestFindAll(t *testing.T) {
 	// 	}
 	// }
 
+}
+
+func TestCreate(t *testing.T) {
+	router := setup()
+
+	token, err := services.CreateToken(1, userData[0].Email)
+	assert.Equal(t, nil, err)
+
+	createItemInput := dto.CreateItemInput{
+		Name:        "test item New",
+		Price:       2010,
+		Description: "This is test",
+	}
+
+	reqBody, _ := json.Marshal(createItemInput)
+
+	w := httptest.NewRecorder()
+
+	req, _ := http.NewRequest("POST", "/items", bytes.NewBuffer(reqBody))
+	req.Header.Set("Authorization", "Bearer "+*token)
+
+	router.ServeHTTP(w, req)
+
+	var res map[string]models.Item
+	json.Unmarshal(w.Body.Bytes(), &res)
+
+	assert.Equal(t, http.StatusCreated, w.Code)
+	assert.Equal(t, uint(4), res["data"].ID)
+
+}
+
+func TestCreateUnauthorized(t *testing.T) {
+	router := setup()
+
+	createItemInput := dto.CreateItemInput{
+		Name:        "test item New",
+		Price:       2010,
+		Description: "This is test",
+	}
+
+	reqBody, _ := json.Marshal(createItemInput)
+
+	w := httptest.NewRecorder()
+
+	req, _ := http.NewRequest("POST", "/items", bytes.NewBuffer(reqBody))
+
+	router.ServeHTTP(w, req)
+
+	var res map[string]models.Item
+	json.Unmarshal(w.Body.Bytes(), &res)
+
+	assert.Equal(t, http.StatusUnauthorized, w.Code)
 }

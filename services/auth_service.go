@@ -1,6 +1,7 @@
 package services
 
 import (
+	"errors"
 	"fmt"
 	"free-market/models"
 	"free-market/repositories"
@@ -83,13 +84,18 @@ func NewAuthService(repository repositories.IAuthRepository) IAuthService {
 }
 
 func CreateToken(userId uint, email string) (*string, error) {
+	secret := os.Getenv("SECRET_KEY")
+	if secret == "" {
+		return nil, errors.New("SECRET_KEY is not set")
+	}
+
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"sub":   userId,
 		"email": email,
 		"exp":   time.Now().Add(time.Hour).Unix(),
 	})
 
-	tokenString, err := token.SignedString([]byte(os.Getenv("SECRET_KEY")))
+	tokenString, err := token.SignedString([]byte(secret))
 	if err != nil {
 		return nil, err
 	}
