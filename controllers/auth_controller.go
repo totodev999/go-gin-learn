@@ -1,13 +1,12 @@
 package controllers
 
 import (
-	"errors"
 	"free-market/dto"
 	"free-market/services"
+	"free-market/utils"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"gorm.io/gorm"
 )
 
 type IAuthController interface {
@@ -22,13 +21,13 @@ type AuthController struct {
 func (c *AuthController) Signup(ctx *gin.Context) {
 	var input dto.SignupInput
 	if err := ctx.ShouldBindJSON(&input); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		ctx.Error(utils.NewBadRequestError("Input data is invalid", err))
 		return
 	}
 
 	err := c.service.Signup(input.Email, input.Password)
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "failed to create user"})
+		ctx.Error(err)
 		return
 	}
 
@@ -38,17 +37,13 @@ func (c *AuthController) Signup(ctx *gin.Context) {
 func (c *AuthController) Login(ctx *gin.Context) {
 	var input dto.LoginInput
 	if err := ctx.ShouldBindJSON(&input); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		ctx.Error(utils.NewBadRequestError("Input data is invalid", err))
 		return
 	}
 
 	token, err := c.service.Login(input.Email, input.Password)
 	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			ctx.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
-			return
-		}
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		ctx.Error(err)
 		return
 	}
 

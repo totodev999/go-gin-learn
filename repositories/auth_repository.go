@@ -2,7 +2,9 @@ package repositories
 
 import (
 	"errors"
+	"fmt"
 	"free-market/models"
+	"free-market/utils"
 
 	"gorm.io/gorm"
 )
@@ -23,7 +25,10 @@ func NewAuthRepository(db *gorm.DB) IAuthRepository {
 func (r *AuthRepository) CreateUser(user models.User) error {
 	result := r.db.Create(&user)
 	if result.Error != nil {
-		return result.Error
+		if errors.Is(result.Error, gorm.ErrDuplicatedKey) {
+			return utils.NewDuplicateKeyError(fmt.Sprintf("Duplicated key %s", user.Email), result.Error)
+		}
+		return utils.NewDBError("create user failed", result.Error)
 	}
 	return nil
 }
@@ -33,10 +38,9 @@ func (r *AuthRepository) FindUser(email string) (*models.User, error) {
 	result := r.db.First(&user, "email = ?", email)
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
-			return nil, errors.New("user not found")
+			return nil, utils.NewNotFoundError(fmt.Sprintf("user %v not found", email), result.Error)
 		}
-		return nil, result.Error
+		return nil, utils.NewDBError("Find user failed", result.Error)
 	}
-
 	return &user, nil
 }
