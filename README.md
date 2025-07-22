@@ -7,3 +7,5 @@ API server sample repository built with Go and Gin.
 1. Custom error
 2. Error handling using custom error
 3. Tests for detecting race condition
+4. Use Postgres for tests
+5. Custom commands
