@@ -11,6 +11,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"strings"
 	"testing"
 
 	"github.com/gin-gonic/gin"
@@ -145,6 +146,53 @@ func TestCreate(t *testing.T) {
 
 	assert.Equal(t, http.StatusCreated, w.Code)
 	assert.Equal(t, uint(4), res["data"].ID)
+
+}
+
+func TestCreateWrongInput(t *testing.T) {
+	router := setup()
+
+	token, err := services.CreateToken(1, userData[0].Email)
+	assert.Equal(t, nil, err)
+
+	cases := []struct {
+		name       string
+		body       string
+		wantStatus int
+	}{
+		{
+			name:       "price is string",
+			body:       `{"price":"文字列","description":"test"}`,
+			wantStatus: http.StatusBadRequest,
+		},
+		{
+			name:       "description is empty",
+			body:       `{"price":200,"description":""}`,
+			wantStatus: http.StatusBadRequest,
+		},
+		{
+			name:       "missing price",
+			body:       `{"description":"test"}`,
+			wantStatus: http.StatusBadRequest,
+		},
+		{
+			name:       "extra unknown field",
+			body:       `{"price":200,"description":"test","unknown":"field"}`,
+			wantStatus: http.StatusBadRequest,
+		},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			w := httptest.NewRecorder()
+			req, _ := http.NewRequest("POST", "/items", strings.NewReader(tc.body))
+			req.Header.Set("Authorization", "Bearer "+*token)
+
+			router.ServeHTTP(w, req)
+
+			assert.Equal(t, tc.wantStatus, w.Code)
+		})
+	}
 
 }
 

@@ -1,7 +1,6 @@
 package middlewares
 
 import (
-	"fmt"
 	"free-market/services"
 	"net/http"
 	"strings"
@@ -37,8 +36,6 @@ func AuthMiddleware(authService services.IAuthService) gin.HandlerFunc {
 
 		ctx.Set("user", user)
 
-		fmt.Printf("前 %+v\n", user)
 		ctx.Next()
-		fmt.Printf("あと %+v\n", user)
 	}
 }

@@ -22,6 +22,8 @@ func setUpRouter(db *gorm.DB) *gin.Engine {
 
 	router := gin.New()
 	router.Use(middlewares.LoggerMiddleware())
+	router.Use(middlewares.APIErrorHandler())
+
 	router.Use(gin.Recovery())
 
 	itemRouter := router.Group("/items")

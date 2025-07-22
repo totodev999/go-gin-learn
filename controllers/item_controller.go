@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"errors"
+	"fmt"
 	"free-market/dto"
 	"free-market/models"
 	"free-market/services"
@@ -72,6 +73,8 @@ func (c *ItemController) Create(ctx *gin.Context) {
 		ctx.Error(utils.NewBadRequestError("Input data is invalid", err))
 		return
 	}
+
+	fmt.Printf("ctx.ShouldBindJSON(&input):  %+v\n", input)
 
 	newItem, err := c.service.Create(input, *userId)
 	if err != nil {
