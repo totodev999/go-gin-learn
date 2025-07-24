@@ -21,13 +21,13 @@ type AuthController struct {
 func (c *AuthController) Signup(ctx *gin.Context) {
 	var input dto.SignupInput
 	if err := ctx.ShouldBindJSON(&input); err != nil {
-		ctx.Error(utils.NewBadRequestError("Input data is invalid", err))
+		_ = ctx.Error(utils.NewBadRequestError("Input data is invalid", err))
 		return
 	}
 
 	err := c.service.Signup(input.Email, input.Password)
 	if err != nil {
-		ctx.Error(err)
+		_ = ctx.Error(err)
 		return
 	}
 
@@ -37,13 +37,13 @@ func (c *AuthController) Signup(ctx *gin.Context) {
 func (c *AuthController) Login(ctx *gin.Context) {
 	var input dto.LoginInput
 	if err := ctx.ShouldBindJSON(&input); err != nil {
-		ctx.Error(utils.NewBadRequestError("Input data is invalid", err))
+		_ = ctx.Error(utils.NewBadRequestError("Input data is invalid", err))
 		return
 	}
 
 	token, err := c.service.Login(input.Email, input.Password)
 	if err != nil {
-		ctx.Error(err)
+		_ = ctx.Error(err)
 		return
 	}
 

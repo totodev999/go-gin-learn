@@ -32,7 +32,7 @@ func NewItemController(service services.IItemService) IItemController {
 func (c *ItemController) FindAll(ctx *gin.Context) {
 	items, err := c.service.FindAll()
 	if err != nil {
-		ctx.Error(err)
+		_ = ctx.Error(err)
 		return
 	}
 
@@ -42,19 +42,19 @@ func (c *ItemController) FindAll(ctx *gin.Context) {
 func (c *ItemController) FindById(ctx *gin.Context) {
 	userId, err := getUserId(ctx)
 	if err != nil {
-		ctx.Error(err)
+		_ = ctx.Error(err)
 		return
 	}
 
 	itemId, err := strconv.Atoi(ctx.Param("id"))
 	if err != nil {
-		ctx.Error(utils.NewBadRequestError("can't get id from path", err))
+		_ = ctx.Error(utils.NewBadRequestError("can't get id from path", err))
 		return
 	}
 
 	item, err := c.service.FindById(uint(itemId), *userId)
 	if err != nil {
-		ctx.Error(err)
+		_ = ctx.Error(err)
 		return
 	}
 
@@ -64,13 +64,13 @@ func (c *ItemController) FindById(ctx *gin.Context) {
 func (c *ItemController) Create(ctx *gin.Context) {
 	userId, err := getUserId(ctx)
 	if err != nil {
-		ctx.Error(err)
+		_ = ctx.Error(err)
 		return
 	}
 
 	var input dto.CreateItemInput
 	if err := ctx.ShouldBindJSON(&input); err != nil {
-		ctx.Error(utils.NewBadRequestError("Input data is invalid", err))
+		_ = ctx.Error(utils.NewBadRequestError("Input data is invalid", err))
 		return
 	}
 
@@ -78,7 +78,7 @@ func (c *ItemController) Create(ctx *gin.Context) {
 
 	newItem, err := c.service.Create(input, *userId)
 	if err != nil {
-		ctx.Error(err)
+		_ = ctx.Error(err)
 		return
 	}
 
@@ -89,25 +89,25 @@ func (c *ItemController) Create(ctx *gin.Context) {
 func (c *ItemController) Update(ctx *gin.Context) {
 	userId, err := getUserId(ctx)
 	if err != nil {
-		ctx.Error(err)
+		_ = ctx.Error(err)
 		return
 	}
 
 	id, err := strconv.Atoi(ctx.Param("id"))
 	if err != nil {
-		ctx.Error(utils.NewBadRequestError("can't get id from path", err))
+		_ = ctx.Error(utils.NewBadRequestError("can't get id from path", err))
 		return
 	}
 
 	var input dto.UpdateItemInput
 	if err := ctx.ShouldBindJSON(&input); err != nil {
-		ctx.Error(utils.NewBadRequestError("Input data is invalid", err))
+		_ = ctx.Error(utils.NewBadRequestError("Input data is invalid", err))
 		return
 	}
 
 	updatedItem, err := c.service.Update(uint(id), input, *userId)
 	if err != nil {
-		ctx.Error(err)
+		_ = ctx.Error(err)
 		return
 	}
 
@@ -118,19 +118,19 @@ func (c *ItemController) Update(ctx *gin.Context) {
 func (c *ItemController) Delete(ctx *gin.Context) {
 	userId, err := getUserId(ctx)
 	if err != nil {
-		ctx.Error(err)
+		_ = ctx.Error(err)
 		return
 	}
 
 	id, err := strconv.Atoi(ctx.Param("id"))
 	if err != nil {
-		ctx.Error(utils.NewBadRequestError("can't get id from path", err))
+		_ = ctx.Error(utils.NewBadRequestError("can't get id from path", err))
 		return
 	}
 
 	err = c.service.Delete(uint(id), *userId)
 	if err != nil {
-		ctx.Error(err)
+		_ = ctx.Error(err)
 		return
 	}
 

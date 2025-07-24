@@ -6,4 +6,4 @@ API server sample repository built with Go and Gin.
 
 1. Tests for detecting race condition
 2. Use Postgres for tests
-3. Custom commands
+3. Find another tool to manage migration histories
