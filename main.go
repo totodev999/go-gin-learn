@@ -6,6 +6,7 @@ import (
 	"free-market/middlewares"
 	"free-market/repositories"
 	"free-market/services"
+	"log"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -50,5 +51,9 @@ func main() {
 
 	router := setUpRouter(db)
 
-	router.Run() // 0.0.0.0:8080 でサーバーを立てます。
+	err := router.Run() // 0.0.0.0:8080 でサーバーを立てます。
+
+	if err != nil {
+		log.Fatalf("Starting server failed: %v", err)
+	}
 }

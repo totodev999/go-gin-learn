@@ -1,7 +1,7 @@
 .PHONY: run test lint migrate
 
 run:
-	go run main.go
+	air
 
 
 # go install gotest.tools/gotestsum@latest
