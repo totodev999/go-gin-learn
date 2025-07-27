@@ -3,10 +3,16 @@ package main
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
+	"free-market/controllers"
 	"free-market/dto"
 	"free-market/infra"
+	"free-market/internal/mocks"
+	"free-market/middlewares"
 	"free-market/models"
+	"free-market/repositories"
 	"free-market/services"
+	"free-market/utils"
 	"log"
 	"net/http"
 	"net/http/httptest"
@@ -62,6 +68,20 @@ func setup() *gin.Engine {
 	setupTestData(db)
 
 	router := setUpRouter(db)
+
+	return router
+}
+
+func setUpRouterWithItemRepo(itemRepo repositories.IItemRepository) *gin.Engine {
+	itemService := services.NewItemService(itemRepo)
+	itemController := controllers.NewItemController(itemService)
+
+	// 本物の認証まわりは今回は不要なので簡易に
+	router := gin.New()
+	router.Use(middlewares.APIErrorHandler())
+	router.Use(gin.Recovery())
+	itemRouter := router.Group("/items")
+	itemRouter.GET("", itemController.FindAll)
 
 	return router
 }
@@ -217,4 +237,38 @@ func TestCreateUnauthorized(t *testing.T) {
 	json.Unmarshal(w.Body.Bytes(), &res)
 
 	assert.Equal(t, http.StatusUnauthorized, w.Code)
+}
+
+func TestItems_FindAll_DBError_Non_CustomError(t *testing.T) {
+	mockRepo := &mocks.MockItemRepository{
+		FindAllFunc: func() (*[]models.Item, error) {
+			return nil, errors.New("mock db error")
+		},
+	}
+
+	router := setUpRouterWithItemRepo(mockRepo)
+
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("GET", "/items", nil)
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusInternalServerError, w.Code)
+	assert.Contains(t, w.Body.String(), "Internal server error") // エラー内容がレスポンスに含まれるか
+}
+
+func TestItems_FindAll_DBError_CustomError(t *testing.T) {
+	mockRepo := &mocks.MockItemRepository{
+		FindAllFunc: func() (*[]models.Item, error) {
+			return nil, utils.NewDBError("Mock", errors.New("Mock"))
+		},
+	}
+
+	router := setUpRouterWithItemRepo(mockRepo)
+
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("GET", "/items", nil)
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusInternalServerError, w.Code)
+	assert.Contains(t, w.Body.String(), utils.DBError)
 }

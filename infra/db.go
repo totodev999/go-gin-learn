@@ -34,7 +34,8 @@ func SetupDB() *gorm.DB {
 	}
 
 	if err != nil {
-		panic("failed to connect database")
+		errMsg := fmt.Sprintf("failed to connect database %v\n", err)
+		panic(errMsg)
 	}
 
 	return db

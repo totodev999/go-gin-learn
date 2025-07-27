@@ -13,7 +13,7 @@ import (
 
 func TestMain(m *testing.M) {
 	if err := godotenv.Load("../.env.test"); err != nil {
-		log.Fatal("Error loading .env.test")
+		log.Fatalf("Error loading .env.test: %v", err)
 	}
 
 	code := m.Run()
