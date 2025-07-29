@@ -1,4 +1,4 @@
-module free-market
+module flea-market
 
 go 1.23.4
 

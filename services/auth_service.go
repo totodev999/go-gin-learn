@@ -2,10 +2,10 @@ package services
 
 import (
 	"errors"
+	"flea-market/models"
+	"flea-market/repositories"
+	"flea-market/utils"
 	"fmt"
-	"free-market/models"
-	"free-market/repositories"
-	"free-market/utils"
 	"os"
 	"time"
 

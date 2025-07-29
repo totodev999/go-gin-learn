@@ -2,8 +2,8 @@ package middlewares
 
 import (
 	// カスタムエラー型のパッケージ
+	"flea-market/utils"
 	"fmt"
-	"free-market/utils"
 
 	"github.com/gin-gonic/gin"
 )

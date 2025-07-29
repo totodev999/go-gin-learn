@@ -3,7 +3,7 @@
 package mocks
 
 import (
-	"free-market/models"
+	"flea-market/models"
 )
 
 type MockItemRepository struct {

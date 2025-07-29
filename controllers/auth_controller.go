@@ -1,9 +1,9 @@
 package controllers
 
 import (
-	"free-market/dto"
-	"free-market/services"
-	"free-market/utils"
+	"flea-market/dto"
+	"flea-market/services"
+	"flea-market/utils"
 	"net/http"
 
 	"github.com/gin-gonic/gin"

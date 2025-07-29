@@ -1,6 +1,7 @@
 package infra
 
 import (
+	test "flea-market/internal/test/utils"
 	"fmt"
 	"os"
 
@@ -26,13 +27,17 @@ func SetupDB() *gorm.DB {
 	)
 
 	if env == "test" {
-		db, err = gorm.Open(sqlite.Open(":memory:"), &gorm.Config{})
-		fmt.Println("using sqlite")
+		if test.RaceEnabled {
+			db, err = gorm.Open(sqlite.Open("file:test.db?mode=memory&cache=shared"), &gorm.Config{})
+			fmt.Println("using sqlite (race detector: cache=shared)")
+		} else {
+			db, err = gorm.Open(sqlite.Open(":memory:"), &gorm.Config{})
+			fmt.Println("using sqlite (:memory:)")
+		}
 	} else {
 		db, err = gorm.Open(postgres.Open(dns), &gorm.Config{})
 		fmt.Println("using postgres")
 	}
-
 	if err != nil {
 		errMsg := fmt.Sprintf("failed to connect database %v\n", err)
 		panic(errMsg)

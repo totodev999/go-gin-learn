@@ -1,8 +1,8 @@
 package main
 
 import (
-	"free-market/infra"
-	"free-market/models"
+	"flea-market/infra"
+	"flea-market/models"
 )
 
 func main() {

@@ -1,7 +1,7 @@
 package middlewares
 
 import (
-	"free-market/services"
+	"flea-market/services"
 	"net/http"
 	"strings"
 

@@ -1,2 +1,4 @@
-^free-market/cmd
-^free-market/internal/mocks
+^flea-market/cmd
+^flea-market/internal/mocks
+^flea-market/internal/mocks
+^flea-market/internal/test

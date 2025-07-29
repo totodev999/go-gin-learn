@@ -2,9 +2,9 @@ package repositories
 
 import (
 	"errors"
+	"flea-market/models"
+	"flea-market/utils"
 	"fmt"
-	"free-market/models"
-	"free-market/utils"
 
 	"gorm.io/gorm"
 )

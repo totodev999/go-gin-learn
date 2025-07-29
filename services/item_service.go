@@ -1,9 +1,9 @@
 package services
 
 import (
-	"free-market/dto"
-	"free-market/models"
-	"free-market/repositories"
+	"flea-market/dto"
+	"flea-market/models"
+	"flea-market/repositories"
 )
 
 type IItemService interface {

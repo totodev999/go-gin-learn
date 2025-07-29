@@ -3,7 +3,7 @@ package middlewares
 import (
 	"crypto/rand"
 	"encoding/hex"
-	"free-market/utils"
+	"flea-market/utils"
 
 	"github.com/gin-gonic/gin"
 )
