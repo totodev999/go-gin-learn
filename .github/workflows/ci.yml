@@ -50,8 +50,6 @@ jobs:
 
       - name: 📥  Install golangci-lint
         uses: golangci/golangci-lint-action@v7
-        with:
-          version: v1.57.2
 
       # ------------- Go セットアップ -------------
       - name: 🔧  Set up Go
