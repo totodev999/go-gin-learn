@@ -78,48 +78,28 @@ jobs:
         run: make lint 2>&1 | tee lint.log
         continue-on-error: true
 
-      - name: 📄 Collect error logs
-        id: logs
-        if: steps.test.outcome == 'failure' || steps.lint.outcome == 'failure'
-        run: |
-          {
-            echo "---- test.log (tail 50) ----"
-            tail -n 50 test.log 2>/dev/null || true
-            echo
-            echo "---- lint.log (tail 50) ----"
-            tail -n 50 lint.log 2>/dev/null || true
-          } > slack_body.txt
-          # GITHUB_OUTPUT へ渡す
-          echo "body<<EOF" >> $GITHUB_OUTPUT
-          cat slack_body.txt >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
-
       # ------------- Slack用の変数をセット -------------
       - name: Set Slack notification env vars
         run: |
           if [[ "${{ steps.test.outcome }}" == "failure" || "${{ steps.lint.outcome }}" == "failure" ]]; then
             echo 'RESULT_ICON=:x:' >> $GITHUB_ENV
-            echo 'LOG_BLOCK=,{"type": "section","text": {"type": "mrkdwn","text": "```${LOG_BODY}```"}}' >> $GITHUB_ENV
-            echo "LOG_BODY=${{ steps.logs.outputs.body }}" >> $GITHUB_ENV
           else
             echo 'RESULT_ICON=:white_check_mark:' >> $GITHUB_ENV
-            echo 'LOG_BLOCK=' >> $GITHUB_ENV
-            echo 'LOG_BODY=' >> $GITHUB_ENV
           fi
 
-      # ------------- payload.jsonを生成 -------------
-      - name: Generate Slack payload.json
-        run: |
-          sudo apt-get update && sudo apt-get install -y gettext-base
-          envsubst < .github/slack/payload.tmpl.json > .github/slack/payload.json
-
-      - name: 📣 Notify Slack
+      - name: Notify Slack
         if: always()
-        uses: slackapi/slack-github-action@v1.24.0
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_URL }}
+        uses: slackapi/slack-github-action@v2.1.1
         with:
-          payload-file-path: '.github/slack/payload.json'
+          webhook: ${{ secrets.SLACK_URL }}
+          webhook-type: incoming-webhook
+          payload: |
+            text: "${{ github.repository }} CI ${{ env.RESULT_ICON }} \n<${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View Run>"
+            blocks:
+              - type: "section"
+                text:
+                  type: "mrkdwn"
+                  text: "GitHub Action build result: ${{ env.RESULT_ICON }}\n${{ github.event.pull_request.html_url || github.event.head_commit.url }}"
 
       - name: ❌ Fail job if any step failed
         if: steps.test.outcome == 'failure' || steps.lint.outcome == 'failure'
