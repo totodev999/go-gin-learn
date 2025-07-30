@@ -91,9 +91,10 @@ jobs:
         if: always()
         uses: slackapi/slack-github-action@v2.1.1
         with:
-          webhook: ${{ secrets.SLACK_URL }}
-          webhook-type: incoming-webhook
+          method: chat.postMessage
+          token: ${{ secrets.SLACK_BOT_TOKEN }}
           payload: |
+            channel: ${{ secrets.SLACK_CHANNEL_ID }}
             text: "${{ github.repository }} CI ${{ env.RESULT_ICON }} \n<${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View Run>"
             blocks:
               - type: "section"
