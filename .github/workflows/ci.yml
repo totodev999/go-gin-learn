@@ -1,4 +1,3 @@
-# .github/workflows/go-ci.yml
 name: Go CI
 
 on:
@@ -10,56 +9,47 @@ jobs:
   build:
     runs-on: ubuntu-latest
     services:
-      # "postgres" という名前でサービスコンテナを定義
       postgres:
-        # Docker Hubの公式PostgreSQLイメージを使用
         image: postgres:13-alpine
-        # サービスコンテナ（PostgreSQL自体）の初期化用環境変数
         env:
           POSTGRES_USER: 'postgres'
           POSTGRES_PASSWORD: 'password'
           POSTGRES_DB: 'fleamarket'
-        # DBが起動して接続可能になるまで待つためのヘルスチェック
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
         ports:
-          # コンテナの5432ポートをホスト（実行環境）の5432ポートにマッピング
           - 5432:5432
 
     env:
-      ENV: 'test' # CI環境なので "prod" ではなく "test" に変更
-      DB_HOST: localhost # サービスコンテナは localhost で接続できる
-      DB_PORT: 5432 # 上記の ports でマッピングしたポート
+      ENV: 'test'
+      DB_HOST: localhost
+      DB_PORT: 5432
       DB_USER: 'postgres'
       DB_PASSWORD: 'password'
       DB_NAME: 'fleamarket'
       SECRET_KEY: '47ed8f16a737a02a43b5211703e6452288961a15b4bebe5683ac862176df515b'
 
     steps:
-      # ------------- ソース取得 -------------
-      - name: 🛎️  Checkout code
+      - name: 🛎️ Checkout code
         uses: actions/checkout@v4
 
-      # ------------- Install cli tools -------------
-      - name: 📥  Install gotestsum
-        run: |
-          go install gotest.tools/gotestsum@latest
+      - name: 📥 Install gotestsum
+        run: go install gotest.tools/gotestsum@latest
 
       - name: Install and run golangci-lint
         uses: golangci/golangci-lint-action@v8
         with:
           version: v2.1
-      # ------------- Go セットアップ -------------
-      - name: 🔧  Set up Go
+
+      - name: 🔧 Set up Go
         uses: actions/setup-go@v5
         with:
           go-version-file: 'go.mod'
 
-      # ------------- キャッシュ -------------
-      - name: 🗄️  Cache go-build
+      - name: 🗄️ Cache go-build
         uses: actions/cache@v4
         with:
           path: ~/.cache/go-build
@@ -67,7 +57,7 @@ jobs:
           restore-keys: |
             go-build-${{ runner.os }}-
 
-      - name: 🗄️  Cache go mod
+      - name: 🗄️ Cache go mod
         uses: actions/cache@v4
         with:
           path: ~/go/pkg/mod
@@ -75,24 +65,20 @@ jobs:
           restore-keys: |
             go-mod-${{ runner.os }}-
 
-      # ------------- 依存ライブラリ -------------
-      - name: 📦  Install dependencies
+      - name: 📦 Install dependencies
         run: go mod download
 
-      # ------------- テスト -------------
-      - name: ✅  Run tests (make test)
+      - name: ✅ Run tests (make test)
         id: test
         run: make test 2>&1 | tee test.log
         continue-on-error: true
 
-      # ------------- Lint -------------
-      - name: 🔍  Run lint (make lint)
+      - name: 🔍 Run lint (make lint)
         id: lint
         run: make lint 2>&1 | tee lint.log
         continue-on-error: true
 
-      # ------------- ログ整理（失敗時のみ）-------------
-      - name: 📄  Collect error logs
+      - name: 📄 Collect error logs
         id: logs
         if: steps.test.outcome == 'failure' || steps.lint.outcome == 'failure'
         run: |
@@ -108,18 +94,41 @@ jobs:
           cat slack_body.txt >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
 
-      # ------------- Slack 通知 -------------
-      - name: 📣  Notify Slack
-        # always() にしないと成功時に実行されない
+      # ------------- Slack用の変数をセット -------------
+      - name: Set Slack notification env vars
+        run: |
+          # Slack通知用変数セット
+          if [[ "${{ steps.test.outcome }}" == "failure" || "${{ steps.lint.outcome }}" == "failure" ]]; then
+            echo 'RESULT_ICON=:x:' >> $GITHUB_ENV
+            echo 'LOG_BLOCK=,{"type": "section","text": {"type": "mrkdwn","text": "```${LOG_BODY}```"}}' >> $GITHUB_ENV
+            echo "LOG_BODY=${{ steps.logs.outputs.body }}" >> $GITHUB_ENV
+          else
+            echo 'RESULT_ICON=:white_check_mark:' >> $GITHUB_ENV
+            echo 'LOG_BLOCK=' >> $GITHUB_ENV
+            echo 'LOG_BODY=' >> $GITHUB_ENV
+          fi
+          echo "REPOSITORY=${{ github.repository }}" >> $GITHUB_ENV
+          echo "SERVER_URL=${{ github.server_url }}" >> $GITHUB_ENV
+          echo "RUN_ID=${{ github.run_id }}" >> $GITHUB_ENV
+          echo "RUN_NUMBER=${{ github.run_number }}" >> $GITHUB_ENV
+          echo "REF_NAME=${{ github.ref_name }}" >> $GITHUB_ENV
+          echo "TEST_OUTCOME=${{ steps.test.outcome }}" >> $GITHUB_ENV
+          echo "LINT_OUTCOME=${{ steps.lint.outcome }}" >> $GITHUB_ENV
+
+      # ------------- payload.jsonを生成 -------------
+      - name: Generate Slack payload.json
+        run: |
+          sudo apt-get update && sudo apt-get install -y gettext-base
+          envsubst < .github/slack/payload.tmpl.json > .github/slack/payload.json
+
+      - name: 📣 Notify Slack
         if: always()
         uses: slackapi/slack-github-action@v1.24.0
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_URL }}
         with:
-          # ペイロードを外部ファイルから読み込む
           payload-file-path: '.github/slack/payload.json'
 
-      # ------------- 最終的な終了ステータス -------------
-      - name: ❌  Fail job if any step failed
+      - name: ❌ Fail job if any step failed
         if: steps.test.outcome == 'failure' || steps.lint.outcome == 'failure'
         run: exit 1
