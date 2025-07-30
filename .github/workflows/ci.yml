@@ -97,7 +97,6 @@ jobs:
       # ------------- Slack用の変数をセット -------------
       - name: Set Slack notification env vars
         run: |
-          # Slack通知用変数セット
           if [[ "${{ steps.test.outcome }}" == "failure" || "${{ steps.lint.outcome }}" == "failure" ]]; then
             echo 'RESULT_ICON=:x:' >> $GITHUB_ENV
             echo 'LOG_BLOCK=,{"type": "section","text": {"type": "mrkdwn","text": "```${LOG_BODY}```"}}' >> $GITHUB_ENV
@@ -107,13 +106,6 @@ jobs:
             echo 'LOG_BLOCK=' >> $GITHUB_ENV
             echo 'LOG_BODY=' >> $GITHUB_ENV
           fi
-          echo "REPOSITORY=${{ github.repository }}" >> $GITHUB_ENV
-          echo "SERVER_URL=${{ github.server_url }}" >> $GITHUB_ENV
-          echo "RUN_ID=${{ github.run_id }}" >> $GITHUB_ENV
-          echo "RUN_NUMBER=${{ github.run_number }}" >> $GITHUB_ENV
-          echo "REF_NAME=${{ github.ref_name }}" >> $GITHUB_ENV
-          echo "TEST_OUTCOME=${{ steps.test.outcome }}" >> $GITHUB_ENV
-          echo "LINT_OUTCOME=${{ steps.lint.outcome }}" >> $GITHUB_ENV
 
       # ------------- payload.jsonを生成 -------------
       - name: Generate Slack payload.json
