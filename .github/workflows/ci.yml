@@ -48,8 +48,8 @@ jobs:
         run: |
           go install gotest.tools/gotestsum@latest
 
-      - name: 📥  Install golangci-lint
-        uses: golangci/golangci-lint-action@v7
+      - name: Install golangci-lint
+        uses: golangci/golangci-lint-action@v8
 
       # ------------- Go セットアップ -------------
       - name: 🔧  Set up Go
