@@ -19,7 +19,7 @@ func ReadEnv() {
 	envPath := filepath.Join(root, ".env")
 
 	if err := godotenv.Load(envPath); err != nil {
-		log.Printf("Warning: %s not found, falling back to system environment variables", envPath)
+		log.Printf("Warning: %s not found, falling back to system environment variables\n", envPath)
 	}
 
 }

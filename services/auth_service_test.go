@@ -1,20 +1,17 @@
 package services
 
 import (
-	"log"
+	test_utils "flea-market/internal/test/utils"
 	"os"
 	"testing"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/joho/godotenv"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestMain(m *testing.M) {
-	if err := godotenv.Load("../.env.test"); err != nil {
-		log.Fatalf("Error loading .env.test: %v", err)
-	}
+	test_utils.ReadEnv()
 
 	code := m.Run()
 
