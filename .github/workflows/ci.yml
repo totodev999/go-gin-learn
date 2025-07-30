@@ -51,8 +51,9 @@ jobs:
       - name: 📥  Install golangci-lint
         uses: golangci/golangci-lint-action@v3
         with:
-          version: v1.57.2
-          install-only: true
+          version: v1.57.2 # 任意に pin
+          install-mode: binary # ← これが新パラメータ
+          args: --version
 
       # ------------- Go セットアップ -------------
       - name: 🔧  Set up Go
