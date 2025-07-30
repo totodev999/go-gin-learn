@@ -33,3 +33,5 @@ go.work.sum
 
 # build binary
 script
+
+race_test_result.log

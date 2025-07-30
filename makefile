@@ -1,4 +1,4 @@
-.PHONY: run test lint migrate clean build clean_tables
+.PHONY: run test lint migrate clean build clean_tables test_race
 
 run:
 	air
@@ -24,6 +24,22 @@ test:
 	go tool cover -func=test_coverage/coverage.out | tee test_coverage/totalCoverage.txt
 	go tool cover -html=test_coverage/coverage.out -o test_coverage/coverage.html
 	open test_coverage/coverage.html
+	$(MAKE) clean_tables
+
+# It's not determined whether race condition can be detected or not, it depends on timing.
+# And cache can cause test to be skipped, so clean cache beforehand.
+test_race:
+	$(MAKE) migrate
+	$(MAKE) clean_tables
+	$(MAKE) clean
+	@echo "Running tests with race detector..."
+	@out="$$(gotestsum --format testdox -- -race ./... 2>&1)"; \
+	echo "$$out"; \
+	if echo "$$out" | grep -q "DATA RACE"; then \
+		echo "\033[0;31m❗️Race condition detected!\033[0m"; \
+	else \
+		echo "\033[0;32m✅ No race condition found.\033[0m"; \
+	fi
 	$(MAKE) clean_tables
 
 # need to install golangci-lint beforehand

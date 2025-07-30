@@ -16,34 +16,21 @@ import (
 	"flea-market/services"
 	"flea-market/utils"
 	"fmt"
-	"log"
 	"net/http"
 	"net/http/httptest"
 	"os"
-	"path/filepath"
 	"strings"
 	"sync"
 	"testing"
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/joho/godotenv"
 	"github.com/stretchr/testify/assert"
 	"gorm.io/gorm"
 )
 
 func TestMain(m *testing.M) {
-	wd, err := os.Getwd()
-	if err != nil {
-		log.Fatalf("failed to get working dir: %v", err)
-	}
-
-	root := test.FindProjectRoot(wd)
-	envPath := filepath.Join(root, ".env.test")
-
-	if err := godotenv.Load(envPath); err != nil {
-		log.Fatal("Error loading .env.test")
-	}
+	test.ReadEnv()
 
 	code := m.Run()
 
@@ -62,8 +49,8 @@ var userData = []models.User{
 }
 
 func setupTestData(db *gorm.DB) {
-	db.Session(&gorm.Session{AllowGlobalUpdate: true}).Delete(&models.Item{})
-	db.Session(&gorm.Session{AllowGlobalUpdate: true}).Delete(&models.User{})
+	db.Exec("TRUNCATE TABLE items RESTART IDENTITY CASCADE;")
+	db.Exec("TRUNCATE TABLE users RESTART IDENTITY CASCADE;")
 
 	items := itemData
 
@@ -80,9 +67,6 @@ func setupTestData(db *gorm.DB) {
 }
 func setup() *gin.Engine {
 	db := infra.SetupDB()
-	// This is necessary for SQLite. Because every time this function is called, new SQLite instance is created.
-	db.Exec("DROP TABLE IF EXISTS users;")
-	db.Exec("DROP TABLE IF EXISTS items;")
 
 	db.AutoMigrate(&models.User{}, &models.Item{})
 	setupTestData(db)

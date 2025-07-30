@@ -4,12 +4,11 @@ API server sample repository built with Go and Gin.
 
 # To-do
 
-1. Tests for detecting race condition
-2. Use Postgres for tests
-3. Find another tool to manage migration histories
-4. Add feature for Sigterm  
+1. Find another tool to manage migration histories  
+   Atlas can be used with Gorm
+2. Add feature for Sigterm
    `https://oiasnak.hatenablog.com/entry/2023/09/10/003752`
-5. better to use session instead of JWT
+3. switch from JWT to session
 
 ## Setup
 
