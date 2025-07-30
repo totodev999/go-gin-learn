@@ -1,5 +1,5 @@
 //go:build race
 
-package test
+package test_utils
 
 const RaceEnabled = true

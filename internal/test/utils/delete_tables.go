@@ -1,15 +1,13 @@
-package main
+package test_utils
 
 import (
-	"flea-market/infra"
 	"fmt"
 	"log"
+
+	"gorm.io/gorm"
 )
 
-func main() {
-	infra.Initializer()
-	db := infra.SetupDB()
-
+func DeleteTables(db *gorm.DB) {
 	var tables []string
 	db.Raw("SELECT tablename FROM pg_tables WHERE schemaname = 'public'").Scan(&tables)
 

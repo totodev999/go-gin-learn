@@ -25,6 +25,6 @@ var Messages = map[MessageCode]string{
 
 	DuplicateKeyError: "Duplicate key",
 
-	DBError:      "DB error",
+	DBError:      "DB ssserror",
 	UnknownError: "UnknownError Error Detail:%v",
 }

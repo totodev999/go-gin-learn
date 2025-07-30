@@ -1,4 +1,4 @@
-package test
+package test_utils
 
 import (
 	"os"

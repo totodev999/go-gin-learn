@@ -1,4 +1,4 @@
-package test
+package api_test
 
 import (
 	"bytes"
@@ -6,10 +6,9 @@ import (
 	"errors"
 	"flea-market/controllers"
 	"flea-market/dto"
-	"flea-market/infra"
 	"flea-market/internal/app"
 	"flea-market/internal/mocks"
-	test "flea-market/internal/test/utils"
+	test_utils "flea-market/internal/test/utils"
 	"flea-market/middlewares"
 	"flea-market/models"
 	"flea-market/repositories"
@@ -18,7 +17,6 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
-	"os"
 	"strings"
 	"sync"
 	"testing"
@@ -29,47 +27,22 @@ import (
 	"gorm.io/gorm"
 )
 
-func TestMain(m *testing.M) {
-	test.ReadEnv()
+func setupItemTestData(db *gorm.DB) {
+	test_utils.DeleteTables(db)
 
-	code := m.Run()
-
-	os.Exit(code)
-}
-
-var itemData = []models.Item{
-	{Name: "test1", Price: 100, Description: "", SoldOut: false, UserID: 1},
-	{Name: "test2", Price: 200, Description: "テスト2", SoldOut: true, UserID: 1},
-	{Name: "test3", Price: 300, Description: "テスト3", SoldOut: false, UserID: 2},
-}
-
-var userData = []models.User{
-	{Email: "test1@test.com", Password: "testpass"},
-	{Email: "test2@test.com", Password: "testpass"},
-}
-
-func setupTestData(db *gorm.DB) {
-	db.Exec("TRUNCATE TABLE items RESTART IDENTITY CASCADE;")
-	db.Exec("TRUNCATE TABLE users RESTART IDENTITY CASCADE;")
-
-	items := itemData
-
-	users := userData
-
-	for _, user := range users {
+	for _, user := range test_utils.UserData {
 		db.Create(&user)
 	}
 
-	for _, item := range items {
+	for _, item := range test_utils.ItemData {
 		db.Create(&item)
 	}
 
 }
-func setup() *gin.Engine {
-	db := infra.SetupDB()
+func setupItemTest() *gin.Engine {
+	db := testDB
 
-	db.AutoMigrate(&models.User{}, &models.Item{})
-	setupTestData(db)
+	setupItemTestData(db)
 	router := app.NewRouter(db)
 	return router
 }
@@ -114,7 +87,7 @@ func toTestItems(items []models.Item) []ItemForTest {
 }
 
 func TestFindAll(t *testing.T) {
-	router := setup()
+	router := setupItemTest()
 
 	w := httptest.NewRecorder()
 
@@ -128,7 +101,7 @@ func TestFindAll(t *testing.T) {
 	assert.Equal(t, http.StatusOK, w.Code)
 	assert.Equal(t, 3, len(res["data"]))
 
-	assert.ElementsMatch(t, toTestItems(itemData), toTestItems(res["data"]))
+	assert.ElementsMatch(t, toTestItems(test_utils.ItemData), toTestItems(res["data"]))
 
 	// Reflect Ver little bit too complicated
 
@@ -146,9 +119,9 @@ func TestFindAll(t *testing.T) {
 }
 
 func TestFindById(t *testing.T) {
-	router := setup()
+	router := setupItemTest()
 
-	token, _ := services.CreateToken(1, userData[0].Email)
+	token, _ := services.CreateToken(1, test_utils.UserData[0].Email)
 
 	w := httptest.NewRecorder()
 
@@ -163,13 +136,13 @@ func TestFindById(t *testing.T) {
 	assert.Equal(t, http.StatusOK, w.Code)
 	assert.Equal(t, uint(1), res["data"].ID)
 
-	assert.Equal(t, toTestItem(itemData[0]), toTestItem(res["data"]))
+	assert.Equal(t, toTestItem(test_utils.ItemData[0]), toTestItem(res["data"]))
 }
 
 func TestCreate(t *testing.T) {
-	router := setup()
+	router := setupItemTest()
 
-	token, err := services.CreateToken(1, userData[0].Email)
+	token, err := services.CreateToken(1, test_utils.UserData[0].Email)
 	assert.Equal(t, nil, err)
 
 	createItemInput := dto.CreateItemInput{
@@ -204,9 +177,9 @@ func TestCreate(t *testing.T) {
 }
 
 func TestUpdate(t *testing.T) {
-	router := setup()
+	router := setupItemTest()
 
-	token, err := services.CreateToken(1, userData[0].Email)
+	token, err := services.CreateToken(1, test_utils.UserData[0].Email)
 	assert.Equal(t, nil, err)
 	reqBody := `{"name":"12","price":999,"description":"updated","soldOut":true}`
 
@@ -238,9 +211,9 @@ func TestUpdate(t *testing.T) {
 }
 
 func Test_Delete(t *testing.T) {
-	router := setup()
+	router := setupItemTest()
 
-	token, err := services.CreateToken(1, userData[0].Email)
+	token, err := services.CreateToken(1, test_utils.UserData[0].Email)
 	assert.Equal(t, nil, err)
 
 	w := httptest.NewRecorder()
@@ -266,9 +239,9 @@ func Test_Delete(t *testing.T) {
 }
 
 func Test_FindById_Wrong_ID(t *testing.T) {
-	router := setup()
+	router := setupItemTest()
 
-	token, err := services.CreateToken(1, userData[0].Email)
+	token, err := services.CreateToken(1, test_utils.UserData[0].Email)
 	assert.Equal(t, nil, err)
 
 	cases := []struct {
@@ -309,9 +282,9 @@ func Test_FindById_Wrong_ID(t *testing.T) {
 }
 
 func Test_Delete_Wrong_ID(t *testing.T) {
-	router := setup()
+	router := setupItemTest()
 
-	token, err := services.CreateToken(1, userData[0].Email)
+	token, err := services.CreateToken(1, test_utils.UserData[0].Email)
 	assert.Equal(t, nil, err)
 
 	cases := []struct {
@@ -351,9 +324,9 @@ func Test_Delete_Wrong_ID(t *testing.T) {
 }
 
 func Test_Create_Wrong_Input(t *testing.T) {
-	router := setup()
+	router := setupItemTest()
 
-	token, err := services.CreateToken(1, userData[0].Email)
+	token, err := services.CreateToken(1, test_utils.UserData[0].Email)
 	assert.Equal(t, nil, err)
 
 	cases := []struct {
@@ -398,9 +371,9 @@ func Test_Create_Wrong_Input(t *testing.T) {
 }
 
 func Test_Update_Wrong_Input(t *testing.T) {
-	router := setup()
+	router := setupItemTest()
 
-	token, err := services.CreateToken(1, userData[0].Email)
+	token, err := services.CreateToken(1, test_utils.UserData[0].Email)
 	assert.Equal(t, nil, err)
 
 	cases := []struct {
@@ -446,7 +419,7 @@ func Test_Update_Wrong_Input(t *testing.T) {
 
 // auth_middleware will check the Authorization token.
 func Test_Unauthorized(t *testing.T) {
-	router := setup()
+	router := setupItemTest()
 	createItemInput := dto.CreateItemInput{
 		Name:        "test item New",
 		Price:       2010,
@@ -540,7 +513,7 @@ func TestItems_FindAll_DBError_CustomError(t *testing.T) {
 }
 
 func Test_Unauthorized_Invalid_Token(t *testing.T) {
-	router := setup()
+	router := setupItemTest()
 	req, _ := http.NewRequest("GET", "/items/1", nil)
 	req.Header.Set("Authorization", "Bearer invalid_token")
 	w := httptest.NewRecorder()
@@ -549,9 +522,9 @@ func Test_Unauthorized_Invalid_Token(t *testing.T) {
 }
 
 func Test_Forbidden_Access_OtherUserItem(t *testing.T) {
-	router := setup()
+	router := setupItemTest()
 
-	token, _ := services.CreateToken(2, userData[1].Email)
+	token, _ := services.CreateToken(2, test_utils.UserData[1].Email)
 	req, _ := http.NewRequest("DELETE", "/items/1", nil)
 	req.Header.Set("Authorization", "Bearer "+*token)
 	w := httptest.NewRecorder()
@@ -561,8 +534,8 @@ func Test_Forbidden_Access_OtherUserItem(t *testing.T) {
 }
 
 func Test_Forbidden_Update_OtherUserItem(t *testing.T) {
-	router := setup()
-	token, _ := services.CreateToken(2, userData[1].Email)
+	router := setupItemTest()
+	token, _ := services.CreateToken(2, test_utils.UserData[1].Email)
 	reqBody := `{"name":"test update","price":111,"description":"try update"}`
 	req, _ := http.NewRequest("PUT", "/items/1", strings.NewReader(reqBody))
 	req.Header.Set("Authorization", "Bearer "+*token)
@@ -572,8 +545,8 @@ func Test_Forbidden_Update_OtherUserItem(t *testing.T) {
 }
 
 func Test_Update_DeletedItem(t *testing.T) {
-	router := setup()
-	token, _ := services.CreateToken(1, userData[0].Email)
+	router := setupItemTest()
+	token, _ := services.CreateToken(1, test_utils.UserData[0].Email)
 	// まず削除
 	reqDel, _ := http.NewRequest("DELETE", "/items/1", nil)
 	reqDel.Header.Set("Authorization", "Bearer "+*token)
@@ -589,11 +562,11 @@ func Test_Update_DeletedItem(t *testing.T) {
 }
 
 func Test_AllEndpoints_Concurrent(t *testing.T) {
-	if !test.RaceEnabled {
+	if !test_utils.RaceEnabled {
 		t.Skip("skip: race detector not enabled")
 	}
-	router := setup()
-	token, err := services.CreateToken(1, userData[0].Email)
+	router := setupItemTest()
+	token, err := services.CreateToken(1, test_utils.UserData[0].Email)
 	assert.NoError(t, err)
 
 	var wg sync.WaitGroup

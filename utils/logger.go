@@ -26,21 +26,27 @@ func Logger(messageId MessageCode, ctx *gin.Context, msg ...any) {
 
 	message := fmt.Sprintf(Messages[messageId], msg...)
 
-	reqId, exist := ctx.Get("reqId")
-	if !exist {
-		reqId = "not set"
+	// default values
+	methodPath := "N/A"
+	reqIdStr := "not set"
+	clientIP := "N/A"
+
+	if ctx != nil {
+		methodPath = ctx.Request.Method + " " + ctx.Request.URL.Path
+		if reqId, exist := ctx.Get("reqId"); exist {
+			reqIdStr = fmt.Sprintf("%v", reqId)
+		}
+		clientIP = ctx.ClientIP()
 	}
-	// 文字列化しておく
-	reqIdStr := fmt.Sprintf("%v", reqId)
 
 	fmt.Printf(
 		logTemplate,
 		time.Now().Format(time.DateTime),
 		logLevel,
 		messageId,
-		ctx.Request.Method+" "+ctx.Request.URL.Path,
+		methodPath,
 		reqIdStr,
-		ctx.ClientIP(),
+		clientIP,
 		message,
 	)
 }

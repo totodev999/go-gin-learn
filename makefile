@@ -11,8 +11,8 @@ PKGS=$(shell go list ./... | grep -v -f $(EXCLUDEDIRS) | paste -sd " " -)
 COVERPKG=$(shell go list ./... | grep -v -f $(EXCLUDEDIRS) | paste -sd "," -)
 
 test:
-	$(MAKE) migrate
 	$(MAKE) clean_tables
+	$(MAKE) migrate
 	@mkdir -p test_coverage
 	@echo "-----------test start-----------"
 	gotestsum --format testdox --junitfile test_coverage/junit-report.xml -- \
@@ -24,13 +24,12 @@ test:
 	go tool cover -func=test_coverage/coverage.out | tee test_coverage/totalCoverage.txt
 	go tool cover -html=test_coverage/coverage.out -o test_coverage/coverage.html
 	open test_coverage/coverage.html
-	$(MAKE) clean_tables
 
 # It's not determined whether race condition can be detected or not, it depends on timing.
 # And cache can cause test to be skipped, so clean cache beforehand.
 test_race:
-	$(MAKE) migrate
 	$(MAKE) clean_tables
+	$(MAKE) migrate
 	$(MAKE) clean
 	@echo "Running tests with race detector..."
 	@out="$$(gotestsum --format testdox -- -race ./... 2>&1)"; \
@@ -40,7 +39,6 @@ test_race:
 	else \
 		echo "\033[0;32m✅ No race condition found.\033[0m"; \
 	fi
-	$(MAKE) clean_tables
 
 # need to install golangci-lint beforehand
 # brew install golangci-lint

@@ -1,6 +1,7 @@
 package infra
 
 import (
+	"flea-market/utils"
 	"fmt"
 	"os"
 
@@ -26,8 +27,9 @@ func SetupDB() *gorm.DB {
 	db, err = gorm.Open(postgres.Open(dns), &gorm.Config{})
 	fmt.Println("using postgres")
 	if err != nil {
-		errMsg := fmt.Sprintf("failed to connect database %v\n", err)
-		panic(errMsg)
+		cstmErr := utils.NewDBError("Connecting db error", err)
+		utils.Logger(cstmErr.MessageCode, nil, cstmErr)
+		panic(cstmErr.Error())
 	}
 
 	return db
