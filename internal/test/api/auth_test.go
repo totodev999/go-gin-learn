@@ -137,12 +137,12 @@ func TestSignupWithDuplicatedEmail(t *testing.T) {
 	req, _ := http.NewRequest("POST", "/auth/signup", bytes.NewBuffer(reqBody))
 	router.ServeHTTP(w, req)
 
-	assert.Equal(t, http.StatusInternalServerError, w.Code)
+	assert.Equal(t, http.StatusConflict, w.Code)
 
 	var res map[string]string
 	json.Unmarshal(w.Body.Bytes(), &res)
 
-	assert.Equal(t, res["error"], string(utils.DBError))
+	assert.Equal(t, res["error"], string(utils.DuplicateKeyError))
 }
 
 func TestLoginWithWrongPassword(t *testing.T) {
