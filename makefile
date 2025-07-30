@@ -23,7 +23,7 @@ test:
 	@echo "-----------test done-----------\n\n"
 	go tool cover -func=test_coverage/coverage.out | tee test_coverage/totalCoverage.txt
 	go tool cover -html=test_coverage/coverage.out -o test_coverage/coverage.html
-	open test_coverage/coverage.html
+
 
 # It's not determined whether race condition can be detected or not, it depends on timing.
 # And cache can cause test to be skipped, so clean cache beforehand.
