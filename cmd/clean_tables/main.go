@@ -18,7 +18,7 @@ func main() {
 	for _, table := range tables {
 		query := fmt.Sprintf("TRUNCATE TABLE %s RESTART IDENTITY CASCADE;", table)
 		if err := db.Exec(query).Error; err != nil {
-			log.Panicf("Failed to delete from %s: %v", table, err)
+			log.Fatalf("Failed to delete from %s: %v", table, err)
 		}
 	}
 

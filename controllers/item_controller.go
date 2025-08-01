@@ -4,7 +4,6 @@ import (
 	"errors"
 	"flea-market/dto"
 	"flea-market/models"
-	"flea-market/services"
 	"flea-market/utils"
 	"net/http"
 	"strconv"
@@ -20,11 +19,19 @@ type IItemController interface {
 	Delete(ctx *gin.Context)
 }
 
-type ItemController struct {
-	service services.IItemService
+type IItemService interface {
+	FindAll() (*[]models.Item, error)
+	FindById(itemId uint, userId uint) (*models.Item, error)
+	Create(createItemInput dto.CreateItemInput, userId uint) (*models.Item, error)
+	Update(itemId uint, updateItemInput dto.UpdateItemInput, userId uint) (*models.Item, error)
+	Delete(itemId uint, userId uint) error
 }
 
-func NewItemController(service services.IItemService) IItemController {
+type ItemController struct {
+	service IItemService
+}
+
+func NewItemController(service IItemService) IItemController {
 	return &ItemController{service: service}
 }
 

@@ -3,11 +3,12 @@ package utils
 type MessageCode string
 
 const (
-	RequestStart MessageCode = "I001-00001"
-	RequestEnd   MessageCode = "I001-00002"
-	BadRequest   MessageCode = "I001-00010"
-	NotFound     MessageCode = "I001-00011"
-	UnAuthorized MessageCode = "I001-00012"
+	RequestStart   MessageCode = "I001-00001"
+	RequestEnd     MessageCode = "I001-00002"
+	BadRequest     MessageCode = "I001-00010"
+	NotFound       MessageCode = "I001-00011"
+	UnAuthorized   MessageCode = "I001-00012"
+	GenericMessage MessageCode = "I001-00020"
 
 	DuplicateKeyError MessageCode = "W001-00001"
 
@@ -22,6 +23,8 @@ var Messages = map[MessageCode]string{
 	BadRequest:   "Bad request",
 	NotFound:     "Not Found",
 	UnAuthorized: "UnAuthorized",
+
+	GenericMessage: "%v",
 
 	DuplicateKeyError: "Duplicate key",
 

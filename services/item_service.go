@@ -3,22 +3,21 @@ package services
 import (
 	"flea-market/dto"
 	"flea-market/models"
-	"flea-market/repositories"
 )
 
-type IItemService interface {
+type IItemRepository interface {
 	FindAll() (*[]models.Item, error)
 	FindById(itemId uint, userId uint) (*models.Item, error)
-	Create(createItemInput dto.CreateItemInput, userId uint) (*models.Item, error)
-	Update(itemId uint, updateItemInput dto.UpdateItemInput, userId uint) (*models.Item, error)
+	Create(newItem models.Item) (*models.Item, error)
+	Update(updateItem models.Item) (*models.Item, error)
 	Delete(itemId uint, userId uint) error
 }
 
 type ItemService struct {
-	repository repositories.IItemRepository
+	repository IItemRepository
 }
 
-func NewItemService(repository repositories.IItemRepository) IItemService {
+func NewItemService(repository IItemRepository) *ItemService {
 	return &ItemService{repository: repository}
 }
 

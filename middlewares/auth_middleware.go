@@ -12,8 +12,6 @@ func AuthMiddleware(authService services.IAuthService) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		header := ctx.GetHeader("Authorization")
 
-		println(header)
-
 		if header == "" {
 			ctx.AbortWithStatus(http.StatusUnauthorized)
 			return
@@ -27,7 +25,6 @@ func AuthMiddleware(authService services.IAuthService) gin.HandlerFunc {
 		}
 
 		tokenString := strings.TrimPrefix(header, Bearer)
-		println(tokenString)
 		user, err := authService.GetUserFromToken(tokenString)
 		if err != nil {
 			ctx.AbortWithStatus(http.StatusUnauthorized)

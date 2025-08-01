@@ -3,7 +3,6 @@ package middlewares
 import (
 	// カスタムエラー型のパッケージ
 	"flea-market/utils"
-	"fmt"
 
 	"github.com/gin-gonic/gin"
 )
@@ -17,7 +16,6 @@ func APIErrorHandler() gin.HandlerFunc {
 
 			if apiErr, ok := err.(*utils.APIError); ok {
 				utils.Logger(apiErr.MessageCode, ctx, err.Error())
-				fmt.Printf("utils.APIError  %v", apiErr.Message)
 				ctx.JSON(apiErr.StatusCode, gin.H{"error": apiErr.MessageCode})
 				return
 			} else {

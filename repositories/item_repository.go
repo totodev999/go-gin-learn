@@ -9,14 +9,6 @@ import (
 	"gorm.io/gorm"
 )
 
-type IItemRepository interface {
-	FindAll() (*[]models.Item, error)
-	FindById(itemId uint, userId uint) (*models.Item, error)
-	Create(newItem models.Item) (*models.Item, error)
-	Update(updateItem models.Item) (*models.Item, error)
-	Delete(itemId uint, userId uint) error
-}
-
 type ItemRepository struct {
 	db *gorm.DB
 }
@@ -81,6 +73,6 @@ func (r *ItemRepository) Update(updateItem models.Item) (*models.Item, error) {
 	return &updateItem, nil
 }
 
-func NewItemRepository(db *gorm.DB) IItemRepository {
+func NewItemRepository(db *gorm.DB) *ItemRepository {
 	return &ItemRepository{db: db}
 }

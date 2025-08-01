@@ -11,7 +11,6 @@ import (
 	test_utils "flea-market/internal/test/utils"
 	"flea-market/middlewares"
 	"flea-market/models"
-	"flea-market/repositories"
 	"flea-market/services"
 	"flea-market/utils"
 	"fmt"
@@ -47,7 +46,7 @@ func setupItemTest() *gin.Engine {
 	return router
 }
 
-func setUpRouterWithItemRepo(itemRepo repositories.IItemRepository) *gin.Engine {
+func setUpRouterWithItemRepo(itemRepo services.IItemRepository) *gin.Engine {
 	itemService := services.NewItemService(itemRepo)
 	itemController := controllers.NewItemController(itemService)
 
