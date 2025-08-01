@@ -2,6 +2,7 @@ package app
 
 import (
 	"flea-market/controllers"
+	"flea-market/infra"
 	"flea-market/middlewares"
 	"flea-market/repositories"
 	"flea-market/services"
@@ -19,6 +20,10 @@ func NewRouter(db *gorm.DB) *gin.Engine {
 	authService := services.NewAuthService(authRepository)
 	authController := controllers.NewAuthController(authService)
 
+	apiClient := infra.NewBaseAPIClient()
+	apiCallRepository := repositories.NewAPICallRepository(apiClient)
+	apiCallController := controllers.NewAPICallController(apiCallRepository)
+
 	router := gin.New()
 	router.Use(middlewares.LoggerMiddleware())
 	router.Use(middlewares.APIErrorHandler())
@@ -27,6 +32,7 @@ func NewRouter(db *gorm.DB) *gin.Engine {
 	itemRouter := router.Group("/items")
 	itemRouterWithAuth := router.Group("/items", middlewares.AuthMiddleware(authService))
 	authRouter := router.Group("/auth")
+	externalRouter := router.Group("/external")
 
 	itemRouter.GET("", itemController.FindAll)
 	itemRouterWithAuth.GET("/:id", itemController.FindById)
@@ -36,6 +42,8 @@ func NewRouter(db *gorm.DB) *gin.Engine {
 
 	authRouter.POST("/signup", authController.Signup)
 	authRouter.POST("/login", authController.Login)
+
+	externalRouter.GET("", apiCallController.GetAllPosts)
 
 	return router
 }

@@ -65,11 +65,31 @@ func NewDBError(detail string, err error) *APIError {
 	}
 }
 
+func NewExternalAPIConnectionError(detail string, err error) *APIError {
+	return &APIError{
+		StatusCode:  http.StatusInternalServerError,
+		MessageCode: ExternalAPIConnectionError,
+		Message:     Messages[ExternalAPIConnectionError],
+		Detail:      detail,
+		Err:         err,
+	}
+}
+
 func NewDuplicateKeyError(detail string, err error) *APIError {
 	return &APIError{
 		StatusCode:  http.StatusConflict,
 		MessageCode: DuplicateKeyError,
 		Message:     Messages[DuplicateKeyError],
+		Detail:      detail,
+		Err:         err,
+	}
+}
+
+func NewExternalAPIReturnsError(detail string, err error) *APIError {
+	return &APIError{
+		StatusCode:  http.StatusInternalServerError,
+		MessageCode: ExternalAPIReturnsError,
+		Message:     Messages[ExternalAPIReturnsError],
 		Detail:      detail,
 		Err:         err,
 	}

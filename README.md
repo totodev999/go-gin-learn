@@ -46,3 +46,7 @@ SECRET_KEY="test"
    `make migrate`
 7. run server  
    `make run`
+
+### Memo
+
+In GoLang, there is no method like asyncLocalStorage in Node. Is it better to pass context to service and repository for logging in a better way?
