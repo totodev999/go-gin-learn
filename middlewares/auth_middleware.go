@@ -1,14 +1,14 @@
 package middlewares
 
 import (
-	"flea-market/services"
+	"flea-market/controllers"
 	"net/http"
 	"strings"
 
 	"github.com/gin-gonic/gin"
 )
 
-func AuthMiddleware(authService services.IAuthService) gin.HandlerFunc {
+func AuthMiddleware(authService controllers.IAuthService) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		header := ctx.GetHeader("Authorization")
 

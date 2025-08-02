@@ -9,10 +9,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type IAPICallController interface {
-	GetAllPosts(ctx *gin.Context)
-}
-
 type IAPICallService interface {
 	GetAllPosts(ctx context.Context) (*[]repositories.Post, error)
 }
@@ -21,7 +17,7 @@ type APICallController struct {
 	service IAPICallService
 }
 
-func NewAPICallController(service IAPICallService) IAPICallController {
+func NewAPICallController(service IAPICallService) *APICallController {
 	return &APICallController{service: service}
 
 }

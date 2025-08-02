@@ -1,6 +1,7 @@
 package repositories
 
 import (
+	"context"
 	"errors"
 	"flea-market/models"
 	"flea-market/utils"
@@ -9,20 +10,15 @@ import (
 	"gorm.io/gorm"
 )
 
-type IAuthRepository interface {
-	CreateUser(user models.User) error
-	FindUser(email string) (*models.User, error)
-}
-
 type AuthRepository struct {
 	db *gorm.DB
 }
 
-func NewAuthRepository(db *gorm.DB) IAuthRepository {
+func NewAuthRepository(db *gorm.DB) *AuthRepository {
 	return &AuthRepository{db: db}
 }
 
-func (r *AuthRepository) CreateUser(user models.User) error {
+func (r *AuthRepository) CreateUser(ctx context.Context, user models.User) error {
 	result := r.db.Create(&user)
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrDuplicatedKey) {
@@ -33,7 +29,8 @@ func (r *AuthRepository) CreateUser(user models.User) error {
 	return nil
 }
 
-func (r *AuthRepository) FindUser(email string) (*models.User, error) {
+func (r *AuthRepository) FindUser(ctx context.Context, email string) (*models.User, error) {
+
 	var user models.User
 	result := r.db.First(&user, "email = ?", email)
 	if result.Error != nil {

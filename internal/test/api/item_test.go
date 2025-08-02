@@ -2,6 +2,7 @@ package api_test
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"errors"
 	"flea-market/controllers"
@@ -479,7 +480,7 @@ func Test_Unauthorized(t *testing.T) {
 
 func TestItems_FindAll_DBError_Non_CustomError(t *testing.T) {
 	mockRepo := &mocks.MockItemRepository{
-		FindAllFunc: func() (*[]models.Item, error) {
+		FindAllFunc: func(ctx context.Context) (*[]models.Item, error) {
 			return nil, errors.New("mock db error")
 		},
 	}
@@ -496,7 +497,7 @@ func TestItems_FindAll_DBError_Non_CustomError(t *testing.T) {
 
 func TestItems_FindAll_DBError_CustomError(t *testing.T) {
 	mockRepo := &mocks.MockItemRepository{
-		FindAllFunc: func() (*[]models.Item, error) {
+		FindAllFunc: func(ctx context.Context) (*[]models.Item, error) {
 			return nil, utils.NewDBError("Mock", errors.New("Mock"))
 		},
 	}

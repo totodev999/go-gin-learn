@@ -1,9 +1,9 @@
 package services
 
 import (
+	"context"
 	"errors"
 	"flea-market/models"
-	"flea-market/repositories"
 	"flea-market/utils"
 	"fmt"
 	"os"
@@ -13,28 +13,27 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-type IAuthService interface {
-	Signup(email string, password string) error
-	Login(email string, password string) (*string, error)
-	GetUserFromToken(toke string) (*models.User, error)
+type IAuthRepository interface {
+	CreateUser(ctx context.Context, user models.User) error
+	FindUser(ctx context.Context, email string) (*models.User, error)
 }
 
 type AuthService struct {
-	repository repositories.IAuthRepository
+	repository IAuthRepository
 }
 
-func (s *AuthService) Signup(email string, password string) error {
+func (s *AuthService) Signup(ctx context.Context, email string, password string) error {
 	hashed, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
 		return utils.NewUnknownError("bcrypt.GenerateFromPassword failed", err)
 	}
 	user := models.User{Email: email, Password: string(hashed)}
-	return s.repository.CreateUser(user)
+	return s.repository.CreateUser(ctx, user)
 
 }
 
-func (s *AuthService) Login(email string, password string) (*string, error) {
-	user, err := s.repository.FindUser(email)
+func (s *AuthService) Login(ctx context.Context, email string, password string) (*string, error) {
+	user, err := s.repository.FindUser(ctx, email)
 	if err != nil {
 		return nil, err
 	}
@@ -75,7 +74,9 @@ func (s *AuthService) GetUserFromToken(token string) (*models.User, error) {
 			return nil, utils.NewUnauthorized("token is expired", jwt.ErrTokenExpired)
 		}
 
-		user, err = s.repository.FindUser(claims["email"].(string))
+		// this function is called by middleware, therefore context is not passed, so create context here.
+		ctx := context.TODO()
+		user, err = s.repository.FindUser(ctx, claims["email"].(string))
 		if err != nil {
 			return nil, err
 		}
@@ -85,7 +86,7 @@ func (s *AuthService) GetUserFromToken(token string) (*models.User, error) {
 
 }
 
-func NewAuthService(repository repositories.IAuthRepository) IAuthService {
+func NewAuthService(repository IAuthRepository) *AuthService {
 	return &AuthService{repository: repository}
 }
 

@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"context"
 	"errors"
 	"flea-market/dto"
 	"flea-market/models"
@@ -11,32 +12,25 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type IItemController interface {
-	FindAll(ctx *gin.Context)
-	FindById(ctx *gin.Context)
-	Create(ctx *gin.Context)
-	Update(ctx *gin.Context)
-	Delete(ctx *gin.Context)
-}
-
 type IItemService interface {
-	FindAll() (*[]models.Item, error)
-	FindById(itemId uint, userId uint) (*models.Item, error)
-	Create(createItemInput dto.CreateItemInput, userId uint) (*models.Item, error)
-	Update(itemId uint, updateItemInput dto.UpdateItemInput, userId uint) (*models.Item, error)
-	Delete(itemId uint, userId uint) error
+	FindAll(ctx context.Context) (*[]models.Item, error)
+	FindById(ctx context.Context, itemId uint, userId uint) (*models.Item, error)
+	Create(ctx context.Context, createItemInput dto.CreateItemInput, userId uint) (*models.Item, error)
+	Update(ctx context.Context, itemId uint, updateItemInput dto.UpdateItemInput, userId uint) (*models.Item, error)
+	Delete(ctx context.Context, itemId uint, userId uint) error
 }
 
 type ItemController struct {
 	service IItemService
 }
 
-func NewItemController(service IItemService) IItemController {
+func NewItemController(service IItemService) *ItemController {
 	return &ItemController{service: service}
 }
 
 func (c *ItemController) FindAll(ctx *gin.Context) {
-	items, err := c.service.FindAll()
+	reqCtx := utils.GinToGoContext(ctx)
+	items, err := c.service.FindAll(reqCtx)
 	if err != nil {
 		_ = ctx.Error(err)
 		return
@@ -46,6 +40,7 @@ func (c *ItemController) FindAll(ctx *gin.Context) {
 }
 
 func (c *ItemController) FindById(ctx *gin.Context) {
+	reqCtx := utils.GinToGoContext(ctx)
 	userId, err := getUserId(ctx)
 	if err != nil {
 		_ = ctx.Error(err)
@@ -58,7 +53,7 @@ func (c *ItemController) FindById(ctx *gin.Context) {
 		return
 	}
 
-	item, err := c.service.FindById(uint(itemId), *userId)
+	item, err := c.service.FindById(reqCtx, uint(itemId), *userId)
 	if err != nil {
 		_ = ctx.Error(err)
 		return
@@ -68,6 +63,7 @@ func (c *ItemController) FindById(ctx *gin.Context) {
 }
 
 func (c *ItemController) Create(ctx *gin.Context) {
+	reqCtx := utils.GinToGoContext(ctx)
 	userId, err := getUserId(ctx)
 	if err != nil {
 		_ = ctx.Error(err)
@@ -80,7 +76,7 @@ func (c *ItemController) Create(ctx *gin.Context) {
 		return
 	}
 
-	newItem, err := c.service.Create(input, *userId)
+	newItem, err := c.service.Create(reqCtx, input, *userId)
 	if err != nil {
 		_ = ctx.Error(err)
 		return
@@ -91,6 +87,7 @@ func (c *ItemController) Create(ctx *gin.Context) {
 }
 
 func (c *ItemController) Update(ctx *gin.Context) {
+	reqCtx := utils.GinToGoContext(ctx)
 	userId, err := getUserId(ctx)
 	if err != nil {
 		_ = ctx.Error(err)
@@ -109,7 +106,7 @@ func (c *ItemController) Update(ctx *gin.Context) {
 		return
 	}
 
-	updatedItem, err := c.service.Update(uint(id), input, *userId)
+	updatedItem, err := c.service.Update(reqCtx, uint(id), input, *userId)
 	if err != nil {
 		_ = ctx.Error(err)
 		return
@@ -120,6 +117,7 @@ func (c *ItemController) Update(ctx *gin.Context) {
 }
 
 func (c *ItemController) Delete(ctx *gin.Context) {
+	reqCtx := utils.GinToGoContext(ctx)
 	userId, err := getUserId(ctx)
 	if err != nil {
 		_ = ctx.Error(err)
@@ -132,7 +130,7 @@ func (c *ItemController) Delete(ctx *gin.Context) {
 		return
 	}
 
-	err = c.service.Delete(uint(id), *userId)
+	err = c.service.Delete(reqCtx, uint(id), *userId)
 	if err != nil {
 		_ = ctx.Error(err)
 		return

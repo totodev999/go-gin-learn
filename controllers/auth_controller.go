@@ -1,31 +1,34 @@
 package controllers
 
 import (
+	"context"
 	"flea-market/dto"
-	"flea-market/services"
+	"flea-market/models"
 	"flea-market/utils"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
 
-type IAuthController interface {
-	Signup(ctx *gin.Context)
-	Login(ctx *gin.Context)
+type IAuthService interface {
+	Signup(ctx context.Context, email string, password string) error
+	Login(ctx context.Context, email string, password string) (*string, error)
+	GetUserFromToken(toke string) (*models.User, error)
 }
 
 type AuthController struct {
-	service services.IAuthService
+	service IAuthService
 }
 
 func (c *AuthController) Signup(ctx *gin.Context) {
+	reqCtx := utils.GinToGoContext(ctx)
 	var input dto.SignupInput
 	if err := ctx.ShouldBindJSON(&input); err != nil {
 		_ = ctx.Error(utils.NewBadRequestError("Input data is invalid", err))
 		return
 	}
 
-	err := c.service.Signup(input.Email, input.Password)
+	err := c.service.Signup(reqCtx, input.Email, input.Password)
 	if err != nil {
 		_ = ctx.Error(err)
 		return
@@ -35,13 +38,15 @@ func (c *AuthController) Signup(ctx *gin.Context) {
 }
 
 func (c *AuthController) Login(ctx *gin.Context) {
+	reqCtx := utils.GinToGoContext(ctx)
+
 	var input dto.LoginInput
 	if err := ctx.ShouldBindJSON(&input); err != nil {
 		_ = ctx.Error(utils.NewBadRequestError("Input data is invalid", err))
 		return
 	}
 
-	token, err := c.service.Login(input.Email, input.Password)
+	token, err := c.service.Login(reqCtx, input.Email, input.Password)
 	if err != nil {
 		_ = ctx.Error(err)
 		return
@@ -50,6 +55,6 @@ func (c *AuthController) Login(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{"token": token})
 }
 
-func NewAuthController(service services.IAuthService) IAuthController {
+func NewAuthController(service IAuthService) *AuthController {
 	return &AuthController{service: service}
 }
