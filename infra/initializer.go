@@ -8,6 +8,6 @@ import (
 
 func Initializer() {
 	if err := godotenv.Load(); err != nil {
-		utils.Logger(utils.GenericMessage, nil, ".env file not found; relying on environment variables")
+		utils.Logger(utils.GenericMessage, "", "", "", ".env file not found; relying on environment variables")
 	}
 }

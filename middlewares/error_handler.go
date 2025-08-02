@@ -15,11 +15,11 @@ func APIErrorHandler() gin.HandlerFunc {
 			err := ctx.Errors.Last().Err
 
 			if apiErr, ok := err.(*utils.APIError); ok {
-				utils.Logger(apiErr.MessageCode, ctx, err.Error())
+				utils.Logger(apiErr.MessageCode, "", "", "", err.Error())
 				ctx.JSON(apiErr.StatusCode, gin.H{"error": apiErr.MessageCode})
 				return
 			} else {
-				utils.Logger(utils.UnknownError, ctx, err.Error())
+				utils.Logger(utils.UnknownError, "", "", "", err.Error())
 				ctx.JSON(500, gin.H{"error": "Internal server error"})
 				return
 			}

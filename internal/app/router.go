@@ -22,7 +22,8 @@ func NewRouter(db *gorm.DB) *gin.Engine {
 
 	apiClient := infra.NewBaseAPIClient()
 	apiCallRepository := repositories.NewAPICallRepository(apiClient)
-	apiCallController := controllers.NewAPICallController(apiCallRepository)
+	apiCallService := services.NewAPICallService(apiCallRepository)
+	apiCallController := controllers.NewAPICallController(apiCallService)
 
 	router := gin.New()
 	router.Use(middlewares.LoggerMiddleware())

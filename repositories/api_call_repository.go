@@ -1,6 +1,7 @@
 package repositories
 
 import (
+	"context"
 	"flea-market/utils"
 	"fmt"
 
@@ -36,13 +37,14 @@ func NewAPICallRepository(apiClient *resty.Client) *APICallRepository {
 	return &APICallRepository{apiClient: apiClient}
 }
 
-func (r *APICallRepository) GetAllPosts() (*[]Post, error) {
+func (r *APICallRepository) GetAllPosts(ctx context.Context) (*[]Post, error) {
 	var result []Post
 	endpoint := baseURL + "/posts"
 
 	res, err := r.apiClient.R().
+		SetContext(ctx).
 		SetResult(&result).
-		Get(baseURL + "/posts/999")
+		Get(baseURL + "/posts")
 
 	// Request itself fails like being unable to connect the server
 	if err != nil {
@@ -52,7 +54,8 @@ func (r *APICallRepository) GetAllPosts() (*[]Post, error) {
 	// When status code is greater than 399, handle and error.
 	// Logging is done by middleware
 	if res.IsError() {
-		return nil, utils.NewExternalAPIReturnsError("", fmt.Errorf("external API error: endpoint=%s status=%d body=%s", endpoint, res.StatusCode(), res.String()))
+		return nil, utils.NewExternalAPIReturnsError("",
+			fmt.Errorf("external API error: endpoint=%s status=%d body=%s", endpoint, res.StatusCode(), res.String()))
 	}
 
 	return &result, nil

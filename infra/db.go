@@ -27,10 +27,10 @@ func SetupDB() *gorm.DB {
 	db, err = gorm.Open(postgres.Open(dns), &gorm.Config{TranslateError: true})
 	if err != nil {
 		cstmErr := utils.NewDBError("Connecting db error", err)
-		utils.Logger(cstmErr.MessageCode, nil, cstmErr)
+		utils.Logger(cstmErr.MessageCode, "", "", "", cstmErr)
 		panic(cstmErr.Error())
 	}
-	utils.Logger(utils.GenericMessage, nil, "Connecting DB successes")
+	utils.Logger(utils.GenericMessage, "", "", "", "Connecting DB successes")
 
 	return db
 }

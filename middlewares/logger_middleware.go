@@ -14,13 +14,19 @@ func LoggerMiddleware() gin.HandlerFunc {
 		if _, err := rand.Read(b); err != nil {
 			panic("failed to generate random ID: " + err.Error())
 		}
+		methodPath := ctx.Request.Method + " " + ctx.Request.URL.Path
 		reqId := hex.EncodeToString(b)
-		ctx.Set("reqId", reqId)
+		clientIP := ctx.ClientIP()
 
-		utils.Logger(utils.RequestStart, ctx)
+		// Set Context
+		utils.SetGinContext(ctx, utils.ContextReqID, reqId)
+		utils.SetGinContext(ctx, utils.ContextIP, clientIP)
+		utils.SetGinContext(ctx, utils.ContextMethodPath, methodPath)
+
+		utils.Logger(utils.RequestStart, methodPath, reqId, clientIP)
 
 		ctx.Next()
 		status := ctx.Writer.Status()
-		utils.Logger(utils.RequestEnd, ctx, status)
+		utils.Logger(utils.RequestEnd, methodPath, reqId, clientIP, status)
 	}
 }

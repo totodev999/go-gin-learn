@@ -1,7 +1,9 @@
 package controllers
 
 import (
+	"context"
 	"flea-market/repositories"
+	"flea-market/utils"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -12,7 +14,7 @@ type IAPICallController interface {
 }
 
 type IAPICallService interface {
-	GetAllPosts() (*[]repositories.Post, error)
+	GetAllPosts(ctx context.Context) (*[]repositories.Post, error)
 }
 
 type APICallController struct {
@@ -25,7 +27,8 @@ func NewAPICallController(service IAPICallService) IAPICallController {
 }
 
 func (c *APICallController) GetAllPosts(ctx *gin.Context) {
-	data, err := c.service.GetAllPosts()
+	reqCtx := utils.GinToGoContext(ctx)
+	data, err := c.service.GetAllPosts(reqCtx)
 	if err != nil {
 		_ = ctx.Error(err)
 		return
