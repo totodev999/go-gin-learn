@@ -2,8 +2,10 @@ package repositories
 
 import (
 	"context"
+	"errors"
 	"flea-market/utils"
 	"fmt"
+	"time"
 
 	"github.com/go-resty/resty/v2"
 )
@@ -41,13 +43,22 @@ func (r *APICallRepository) GetAllPosts(ctx context.Context) (*[]Post, error) {
 	var result []Post
 	endpoint := baseURL + "/posts"
 
+	apiReqCtx, cancel := context.WithTimeout(ctx, 5*time.Second)
+	defer cancel()
+
 	res, err := r.apiClient.R().
-		SetContext(ctx).
+		SetContext(apiReqCtx).
 		SetResult(&result).
 		Get(baseURL + "/posts")
 
 	// Request itself fails like being unable to connect the server
 	if err != nil {
+		if errors.Is(err, context.DeadlineExceeded) {
+			return nil, errors.New("API呼び出しがタイムアウトしました:" + err.Error())
+		}
+		if errors.Is(err, context.Canceled) {
+			return nil, errors.New("API呼び出しがキャンセルされました" + err.Error())
+		}
 		return nil, utils.NewExternalAPIConnectionError(fmt.Sprintf("Method:GET Path:%v", endpoint), err)
 	}
 

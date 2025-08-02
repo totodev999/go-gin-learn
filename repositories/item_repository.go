@@ -6,6 +6,8 @@ import (
 	"flea-market/models"
 	"flea-market/utils"
 	"fmt"
+	"strings"
+	"time"
 
 	"gorm.io/gorm"
 )
@@ -16,8 +18,21 @@ type ItemRepository struct {
 
 // Create implements IItemRepository.
 func (r *ItemRepository) Create(ctx context.Context, newItem models.Item) (*models.Item, error) {
-	result := r.db.Create(&newItem)
+	apiReqCtx, cancel := context.WithTimeout(ctx, 5*time.Second)
+	defer cancel()
+
+	result := r.db.WithContext(apiReqCtx).Create(&newItem)
 	if result.Error != nil {
+		// "strings.Contains" completely is a workaround.
+		// But as far as searched, a better way is not found.
+		errMsg := result.Error.Error()
+		if strings.Contains(errMsg, "context deadline exceeded") {
+			return nil, errors.New("DB処理がタイムアウトしました:" + errMsg)
+		}
+		if strings.Contains(errMsg, "context canceled") {
+			return nil, errors.New("DB処理がキャンセルされました:" + errMsg)
+		}
+		// 他のエラー
 		return nil, utils.NewDBError("Create item failed", result.Error)
 	}
 
