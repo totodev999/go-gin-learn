@@ -19,7 +19,8 @@ const (
 	DBError                    MessageCode = "E001-00001"
 	ExternalAPIConnectionError MessageCode = "E001-00002"
 
-	UnknownError MessageCode = "E001-00010"
+	UnknownError     MessageCode = "E001-00010"
+	PanicThrownError MessageCode = "E001-00099"
 )
 
 var Messages = map[MessageCode]string{
@@ -39,5 +40,7 @@ var Messages = map[MessageCode]string{
 
 	DBError:                    "DB error",
 	ExternalAPIConnectionError: "Connection failed Error:%v",
-	UnknownError:               "UnknownError Error Detail:%v",
+
+	UnknownError:     "UnknownError Error Detail:%v",
+	PanicThrownError: "Panic happened:%v",
 }

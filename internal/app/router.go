@@ -28,7 +28,7 @@ func NewRouter(db *gorm.DB) *gin.Engine {
 	router := gin.New()
 	router.Use(middlewares.LoggerMiddleware())
 	router.Use(middlewares.APIErrorHandler())
-	router.Use(gin.Recovery())
+	router.Use(middlewares.CustomRecovery())
 
 	itemRouter := router.Group("/items")
 	itemRouterWithAuth := router.Group("/items", middlewares.AuthMiddleware(authService))

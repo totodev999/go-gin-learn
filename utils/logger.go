@@ -31,6 +31,13 @@ func Logger(messageId MessageCode, methodPath, reqID, clientIP string, msg ...an
 
 	message := fmt.Sprintf(Messages[messageId], msg...)
 
+	// At "error_handler.go", error.Error() is called, so except for panic, basically string will be passed.
+	for _, v := range msg {
+		if err, ok := v.(error); ok {
+			message += "errorStack=" + fmt.Sprintf("%+v", err)
+		}
+	}
+
 	fmt.Printf(
 		logTemplate,
 		time.Now().Format(time.DateTime),

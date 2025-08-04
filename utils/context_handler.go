@@ -27,6 +27,22 @@ func SetGinContext(ginCtx *gin.Context, key Keys, value any) {
 	ginCtx.Set(string(key), value)
 }
 
+func GetGinContext(ginCtx *gin.Context, key Keys) (any, bool) {
+	return ginCtx.Get(string(key))
+}
+
+func GetGinLogContext(ginCtx *gin.Context) (ip string, reqID string, methodPath string) {
+	ipBfr, _ := GetGinContext(ginCtx, ContextIP)
+	reqIDBfr, _ := GetGinContext(ginCtx, ContextReqID)
+	methodPathBfr, _ := GetGinContext(ginCtx, ContextMethodPath)
+
+	ip = ipBfr.(string)
+	reqID = reqIDBfr.(string)
+	methodPath = methodPathBfr.(string)
+
+	return ip, reqID, methodPath
+}
+
 func GinToGoContext(ginCtx *gin.Context) context.Context {
 	ctx := ginCtx.Request.Context()
 	for _, key := range CtxKeys {

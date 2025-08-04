@@ -43,7 +43,7 @@ func (r *APICallRepository) GetAllPosts(ctx context.Context) (*[]Post, error) {
 	var result []Post
 	endpoint := baseURL + "/posts"
 
-	apiReqCtx, cancel := context.WithTimeout(ctx, 5*time.Second)
+	apiReqCtx, cancel := context.WithTimeout(ctx, 1*time.Microsecond)
 	defer cancel()
 
 	res, err := r.apiClient.R().
