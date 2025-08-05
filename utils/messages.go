@@ -19,7 +19,8 @@ const (
 	DBError                    MessageCode = "E001-00001"
 	ExternalAPIConnectionError MessageCode = "E001-00002"
 
-	UnknownError     MessageCode = "E001-00010"
+	UnknownError MessageCode = "E001-00010"
+
 	PanicThrownError MessageCode = "E001-00099"
 )
 

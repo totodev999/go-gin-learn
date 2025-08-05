@@ -5,6 +5,7 @@ import (
 	"errors"
 	"flea-market/utils"
 	"fmt"
+	"os"
 	"time"
 
 	"github.com/go-resty/resty/v2"
@@ -33,9 +34,19 @@ type Post struct {
 	Dummy  *string `json:"dummy"`
 }
 
-const baseURL = "https://jsonplaceholder.typicode.com/"
+var baseURL string
+
+// is it better to use "resty.Client" BaseUrl?
+func setURL() {
+	baseURL = os.Getenv("BASE_URL")
+	if baseURL == "" {
+		utils.Logger(utils.ExternalAPIConnectionError, "", "", "", "env BASE_URL is not set")
+		panic("env BASE_URL is not set")
+	}
+}
 
 func NewAPICallRepository(apiClient *resty.Client) *APICallRepository {
+	setURL()
 	return &APICallRepository{apiClient: apiClient}
 }
 
@@ -43,7 +54,7 @@ func (r *APICallRepository) GetAllPosts(ctx context.Context) (*[]Post, error) {
 	var result []Post
 	endpoint := baseURL + "/posts"
 
-	apiReqCtx, cancel := context.WithTimeout(ctx, 1*time.Microsecond)
+	apiReqCtx, cancel := context.WithTimeout(ctx, 3*time.Second)
 	defer cancel()
 
 	res, err := r.apiClient.R().
