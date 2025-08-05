@@ -45,6 +45,7 @@ func NewRouter(db *gorm.DB) *gin.Engine {
 	authRouter.POST("/login", authController.Login)
 
 	externalRouter.GET("", apiCallController.GetAllPosts)
+	externalRouter.GET("/user/:userId", apiCallController.GetUserAndPosts)
 
 	return router
 }

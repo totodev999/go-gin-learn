@@ -50,3 +50,26 @@ SECRET_KEY="test"
 ### Memo
 
 In GoLang, there is no method like asyncLocalStorage in Node. Is it better to pass context to service and repository for logging in a better way?
+
+### Debug
+
+1. go install github.com/go-delve/delve/cmd/dlv@latest
+2. .vscode/launch.json
+
+```
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Launch Gin API",
+      "type": "go",
+      "request": "launch",
+      "mode": "auto",
+      "program": "${workspaceFolder}/main.go",
+      "env": {
+        "GIN_MODE": "debug"
+      }
+    }
+  ]
+}
+```

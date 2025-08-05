@@ -7,6 +7,7 @@ import (
 
 type IAPICallRepository interface {
 	GetAllPosts(ctx context.Context) (*[]repositories.Post, error)
+	GetUserAndPosts(ctx context.Context, userId uint) (*repositories.UserAndPosts, error)
 }
 
 type APICallService struct {
@@ -20,4 +21,8 @@ func NewAPICallService(repository IAPICallRepository) *APICallService {
 // In many example, context is passed as it is, not convert into pointer.
 func (s *APICallService) GetAllPosts(ctx context.Context) (*[]repositories.Post, error) {
 	return s.repository.GetAllPosts(ctx)
+}
+
+func (s *APICallService) GetUserAndPosts(ctx context.Context, userId uint) (*repositories.UserAndPosts, error) {
+	return s.repository.GetUserAndPosts(ctx, userId)
 }
