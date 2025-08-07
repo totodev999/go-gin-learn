@@ -33,6 +33,7 @@ DB_NAME="fleamarket"
 DB_PORT="5432"
 # openssl rand -hex 32
 SECRET_KEY="47ed8f16a737a02a43b5211703e6452288961a15b4bebe5683ac862176df515b"
+BASE_URL="https://jsonplaceholder.typicode.com"
 ```
 
 `.env.test`
