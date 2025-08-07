@@ -21,11 +21,6 @@ func (m *mockRoundTripper) RoundTrip(req *http.Request) (*http.Response, error) 
 	return m.fn(req)
 }
 
-// ポインタユーティリティ
-func strPtr(s string) *string { return &s }
-func uintPtr(i uint) *uint    { return &i }
-func intPtr(i int) *int       { return &i }
-
 func TestGetAllPosts_Success(t *testing.T) {
 	t.Setenv("BASE_URL", "http://dummy")
 
